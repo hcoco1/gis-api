@@ -1,7 +1,7 @@
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Response   # ← single import line, all three
 from fastapi.middleware.cors import CORSMiddleware
 from app.db import get_conn, release_conn
-from app.queries import fetch_geojson_bbox
+from app.queries import fetch_geojson_bbox_raw  # ← only import the raw version
 
 app = FastAPI()
 
@@ -24,13 +24,13 @@ def get_boreholes(
     miny: float = Query(...),
     maxx: float = Query(...),
     maxy: float = Query(...),
-    zoom: int = Query(10)       # ← new parameter, default 10 if not sent
+    zoom: int = Query(10)
 ):
-    precision = max(0, zoom - 6)  # zoom 7→1, zoom 8→2, zoom 9→3, zoom 10+→4+
+    precision = max(0, zoom - 6)
     conn = get_conn()
     try:
-        data = fetch_geojson_bbox(conn, "boreholes", minx, miny, maxx, maxy, precision)
-        return data
+        raw_json = fetch_geojson_bbox_raw(conn, "boreholes", minx, miny, maxx, maxy, precision)
+        return Response(content=raw_json, media_type="application/json")
     finally:
         release_conn(conn)
 
@@ -41,12 +41,11 @@ def get_pipelines(
     miny: float = Query(...),
     maxx: float = Query(...),
     maxy: float = Query(...)
-    # no zoom — pipelines don't need thinning
 ):
     conn = get_conn()
     try:
-        data = fetch_geojson_bbox(conn, "pipelines", minx, miny, maxx, maxy)
-        return data
+        raw_json = fetch_geojson_bbox_raw(conn, "pipelines", minx, miny, maxx, maxy)
+        return Response(content=raw_json, media_type="application/json")
     finally:
         release_conn(conn)
 
@@ -60,7 +59,7 @@ def get_licenses(
 ):
     conn = get_conn()
     try:
-        data = fetch_geojson_bbox(conn, "active_licenses", minx, miny, maxx, maxy)
-        return data
+        raw_json = fetch_geojson_bbox_raw(conn, "active_licenses", minx, miny, maxx, maxy)
+        return Response(content=raw_json, media_type="application/json")
     finally:
         release_conn(conn)

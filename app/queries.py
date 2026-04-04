@@ -1,21 +1,11 @@
-def fetch_geojson_bbox(conn, table, minx, miny, maxx, maxy, precision=4):
-    """
-    precision controls spatial thinning:
-    - low precision (1-2) = coarse grid = fewer points = zoomed out views
-    - high precision (4+) = fine grid = all points = zoomed in views
-    
-    DISTINCT ON rounds coordinates to a grid cell and keeps one 
-    point per cell, giving geographically even coverage.
-    """
-
-    # For boreholes (points), use grid-based deduplication
-    # For lines/polygons (pipelines, licenses), skip thinning entirely
+# queries.py — return raw string, not a Python dict
+def fetch_geojson_bbox_raw(conn, table, minx, miny, maxx, maxy, precision=4):
     if precision < 4:
         query = f"""
         SELECT json_build_object(
             'type', 'FeatureCollection',
             'features', COALESCE(json_agg(feature), '[]'::json)
-        )
+        )::text                          -- ← cast to text here, stays a string
         FROM (
             SELECT DISTINCT ON (
                 ROUND(ST_X(geom)::numeric, {precision}),
@@ -35,12 +25,11 @@ def fetch_geojson_bbox(conn, table, minx, miny, maxx, maxy, precision=4):
         ) sub
         """
     else:
-        # Full detail — original query
         query = f"""
         SELECT json_build_object(
             'type', 'FeatureCollection',
             'features', COALESCE(json_agg(feature), '[]'::json)
-        )
+        )::text                          -- ← same here
         FROM (
             SELECT json_build_object(
                 'type', 'Feature',
@@ -58,6 +47,6 @@ def fetch_geojson_bbox(conn, table, minx, miny, maxx, maxy, precision=4):
         result = cur.fetchone()[0]
 
     if result is None:
-        return {"type": "FeatureCollection", "features": []}
+        return '{"type":"FeatureCollection","features":[]}'
 
-    return result
+    return result  # ← already a string, goes straight to Response()
