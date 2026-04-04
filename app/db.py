@@ -1,19 +1,16 @@
 import psycopg2
-from dotenv import load_dotenv
 import os
-import sys
+from dotenv import load_dotenv
 
+# Load environment variables
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-if not DATABASE_URL:
-    print("ERROR: DATABASE_URL not found in environment variables.")
-    sys.exit(1)
-
-try:
-    connection = psycopg2.connect(DATABASE_URL)
-    print("Successfully connected to the database!")
-except Exception as e:
-    print(f"Connection failed: {e}")
-    sys.exit(1)
+def get_conn():
+    """
+    This is the function app/main.py is looking for.
+    It creates and returns a connection to your Supabase DB.
+    """
+    # Note: Using the connection string directly from Render environment
+    return psycopg2.connect(DATABASE_URL)
