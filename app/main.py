@@ -1,8 +1,19 @@
 from fastapi import FastAPI
 from app.db import get_conn
 from app.queries import fetch_geojson
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 def root():
