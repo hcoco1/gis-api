@@ -13,4 +13,4 @@ def get_conn():
     It creates and returns a connection to your Supabase DB.
     """
     # Note: Using the connection string directly from Render environment
-    return psycopg2.connect(DATABASE_URL)
+    return psycopg2.connect(DATABASE_URL, sslmode="require")

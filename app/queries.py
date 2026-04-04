@@ -1,4 +1,6 @@
-def fetch_geojson(conn, table):
+
+
+def fetch_geojson_bbox(conn, table, minx, miny, maxx, maxy):
     query = f"""
     SELECT json_build_object(
         'type', 'FeatureCollection',
@@ -10,9 +12,18 @@ def fetch_geojson(conn, table):
             )
         )
     )
-    FROM {table} t;
+    FROM {table} t
+    WHERE geom && ST_MakeEnvelope(%s, %s, %s, %s, 4326);
     """
 
     with conn.cursor() as cur:
-        cur.execute(query)
-        return cur.fetchone()[0]
+        cur.execute(query, (minx, miny, maxx, maxy))
+        result = cur.fetchone()[0]
+
+    if result is None:
+        return {
+            "type": "FeatureCollection",
+            "features": []
+        }
+
+    return result
