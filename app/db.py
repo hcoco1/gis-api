@@ -4,8 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL")
-print("DB URL:", DATABASE_URL)  # ← add this temporarily
+
 
 def get_conn():
-    return psycopg.connect(DATABASE_URL)
+    return psycopg.connect("postgresql://postgres:ETXIm8Oq5TQ9jIbp@db.iqermjanhbuaocgyiamn.supabase.co:5432/postgres?sslmode=require")
