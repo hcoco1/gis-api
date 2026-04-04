@@ -14,6 +14,7 @@ def fetch_geojson_bbox(conn, table, minx, miny, maxx, maxy):
     )
     FROM {table} t
     WHERE geom && ST_MakeEnvelope(%s, %s, %s, %s, 4326);
+    LIMIT 2000;
     """
 
     with conn.cursor() as cur:
