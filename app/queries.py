@@ -6,14 +6,18 @@ def fetch_geojson_bbox(conn, table, minx, miny, maxx, maxy):
         'features', json_agg(feature)
     )
     FROM (
-        SELECT json_build_object(
+        SELECT DISTINCT ON (
+            ROUND(ST_X(geom)::numeric, 2),  -- grid cell x
+            ROUND(ST_Y(geom)::numeric, 2)   -- grid cell y
+        )
+        json_build_object(
             'type', 'Feature',
             'geometry', ST_AsGeoJSON(geom)::json,
             'properties', to_jsonb(t) - 'geom'
         ) AS feature
         FROM {table} t
         WHERE geom && ST_MakeEnvelope(%s, %s, %s, %s, 4326)
-        LIMIT 1000
+        LIMIT 2000
     ) sub
     """
 
