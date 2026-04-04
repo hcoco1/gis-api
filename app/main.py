@@ -21,30 +21,38 @@ def root():
     return {"message": "GIS API running 🚀"}
 
 
+from app.db import get_conn, release_conn
+
 @app.get("/boreholes")
-def get_boreholes(
-    minx: float = Query(...),
-    miny: float = Query(...),
-    maxx: float = Query(...),
-    maxy: float = Query(...)
-):
+def get_boreholes(minx: float = Query(...), miny: float = Query(...),
+                  maxx: float = Query(...), maxy: float = Query(...)):
     conn = get_conn()
-    data = fetch_geojson_bbox(conn, "boreholes", minx, miny, maxx, maxy)
-    conn.close()
-    return data
+    try:
+        data = fetch_geojson_bbox(conn, "boreholes", minx, miny, maxx, maxy)
+        return data
+    finally:
+        release_conn(conn)  # Always return the connection!
+
+# Same pattern for /pipelines and /licenses
 
 
 @app.get("/pipelines")
-def get_pipelines(minx: float, miny: float, maxx: float, maxy: float):
+def get_pipelines(minx: float = Query(...), miny: float = Query(...),
+                  maxx: float = Query(...), maxy: float = Query(...)):
     conn = get_conn()
-    data = fetch_geojson_bbox(conn, "pipelines", minx, miny, maxx, maxy)
-    conn.close()
-    return data
+    try:
+        data = fetch_geojson_bbox(conn, "pipelines", minx, miny, maxx, maxy)
+        return data
+    finally:
+        release_conn(conn)  # Always return the connection! 
 
 
 @app.get("/licenses")
-def get_licenses(minx: float, miny: float, maxx: float, maxy: float):
+def get_licenses(minx: float = Query(...), miny: float = Query(...),
+                 maxx: float = Query(...), maxy: float = Query(...)):
     conn = get_conn()
-    data = fetch_geojson_bbox(conn, "active_licenses", minx, miny, maxx, maxy)
-    conn.close()
-    return data
+    try:
+        data = fetch_geojson_bbox(conn, "active_licenses", minx, miny, maxx, maxy)
+        return data
+    finally:
+        release_conn(conn)  # Always return the connection!

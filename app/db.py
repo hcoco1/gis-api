@@ -1,16 +1,16 @@
-import psycopg2
+import psycopg2.pool
 import os
 from dotenv import load_dotenv
 
-# Load environment variables
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
+# Create a shared pool (min 1, max 10 connections)
+_pool = psycopg2.pool.ThreadedConnectionPool(1, 10, DATABASE_URL, sslmode="require")
+
 def get_conn():
-    """
-    This is the function app/main.py is looking for.
-    It creates and returns a connection to your Supabase DB.
-    """
-    # Note: Using the connection string directly from Render environment
-    return psycopg2.connect(DATABASE_URL, sslmode="require")
+    return _pool.getconn()
+
+def release_conn(conn):
+    _pool.putconn(conn)
