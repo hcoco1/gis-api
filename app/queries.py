@@ -7,7 +7,7 @@ def fetch_geojson_bbox_raw(conn, table, minx, miny, maxx, maxy, precision=4):
             'features', COALESCE(json_agg(feature), '[]'::json)
         )::text                          -- ← cast to text here, stays a string
         FROM (
-            SELECT DISTINCT ON (
+            SELECT  (
                 ROUND(ST_X(geom)::numeric, {precision}),
                 ROUND(ST_Y(geom)::numeric, {precision})
             )
