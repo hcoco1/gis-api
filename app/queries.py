@@ -21,7 +21,7 @@ def fetch_geojson_bbox_raw(conn, table, minx, miny, maxx, maxy, precision=4):
             ORDER BY
                 ROUND(ST_X(geom)::numeric, {precision}),
                 ROUND(ST_Y(geom)::numeric, {precision})
-            LIMIT 2000
+            LIMIT 5000
         ) sub
         """
     else:
@@ -38,7 +38,7 @@ def fetch_geojson_bbox_raw(conn, table, minx, miny, maxx, maxy, precision=4):
             ) AS feature
             FROM {table} t
             WHERE geom && ST_MakeEnvelope(%s, %s, %s, %s, 4326)
-            LIMIT 2000
+            LIMIT 5000
         ) sub
         """
 
