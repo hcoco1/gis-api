@@ -5,7 +5,7 @@ def fetch_geojson_bbox_raw(conn, table, minx, miny, maxx, maxy, precision=4, sta
     params = [minx, miny, maxx, maxy]
 
     if status:
-        status_filter = " AND status = %s"
+        status_filter = " AND LOWER(status) = LOWER(%s)"
         params.append(status)
 
     if precision < 4:
