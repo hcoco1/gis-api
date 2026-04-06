@@ -18,19 +18,21 @@ def root():
     return {"message": "GIS API running 🚀"}
 
 
+@app.get("/boreholes")
 def get_boreholes(
-    minx: float = Query(...),
-    miny: float = Query(...),
-    maxx: float = Query(...),
-    maxy: float = Query(...),
-    zoom: int = Query(10),
-    status: str = Query(None)   # 👈 ADD THIS
+    minx: float,
+    miny: float,
+    maxx: float,
+    maxy: float,
+    zoom: int = 10,
+    status: str = None
 ):
     precision = max(0, zoom - 6)
     conn = get_conn()
     try:
         raw_json = fetch_geojson_bbox_raw(
-    conn, "boreholes", minx, miny, maxx, maxy, precision, status)
+            conn, "boreholes", minx, miny, maxx, maxy, precision, status
+        )
         return Response(content=raw_json, media_type="application/json")
     finally:
         release_conn(conn)
